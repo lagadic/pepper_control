@@ -20,7 +20,8 @@ private:
   boost::mutex lock_;
 
 
-  bool m_start;
+  bool m_taskStarted;
+  bool m_firstTimeTask;
 
 
 public:
@@ -31,8 +32,8 @@ public:
   void setTask();
   qi::PeriodicTask::Callback printTime() ;
   void applyJointVelocity() ;
-  void applyJointVelocity_test();
   void start();
+//  void stopJoint();
   void stop();
 
 };

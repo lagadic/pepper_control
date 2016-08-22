@@ -1,0 +1,11 @@
+<package uuid="pepper_control" version="0.1.0">
+  <services>
+
+    <service name="pepper_control" autorun="true" execStart="bin/pepper_control" />
+    <executableFiles>
+      <file path="bin/pepper_control" />
+    </executableFiles>
+
+  </services>
+
+</package>

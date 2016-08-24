@@ -6,4 +6,4 @@ find_package(qibuild)
 
 include_directories(".")
 qi_create_bin(pepper_control main.cpp control.hpp control.cpp)
-qi_use_lib(pepper_control QI)
+qi_use_lib(pepper_control QI ALCOMMON ALPROXIES)

@@ -100,7 +100,7 @@ void Control::setDesJointVelocity (std::vector<std::string> jointNames, std::vec
       QMin[i] = limits[0][0];
       QMax[i] = limits[0][1];
       VitMax[i] = limits[0][2];
-      AccMax[i] = 0.5*8; // To improve (~10deg in 2 sec)
+      AccMax[i] = 5.; // To improve (~10deg in 2 sec)
       std::cout << " jointNames " << jointNames[i] << " " << QMin[i] << " " << QMax[i] << " " << VitMax[i] << std::endl;
 
       FlagSpeed[i] = false;
@@ -167,7 +167,7 @@ void Control::applyJointVelocity()
     qi::MicroSeconds us = boost::chrono::duration_cast<qi::MicroSeconds>(now - m_prev);
     double delta_t =  us.count()/1000000.;
 
-      std::cout << " delta " << delta_t << std::endl;
+//      std::cout << " delta " << delta_t << std::endl;
 
     /*
      * Test si changement de consigne.
@@ -250,9 +250,9 @@ void Control::applyJointVelocity()
       }
     }
 
-    std::cout << "ConsFin: ";
-    for (int i=0;i<jointNames.size();i++)
-      std::cout << jointNames[i] << "(" << ConsFin[i] << ") ";
+//    std::cout << "ConsFin: ";
+//    for (int i=0;i<jointNames.size();i++)
+//      std::cout << jointNames[i] << "(" << ConsFin[i] << ") ";
 
     /*
      * calcul des consignes selon les cas:
@@ -354,10 +354,10 @@ void Control::applyJointVelocity()
         break;
       }
     }
-    std::cout << "new_pos: ";
-    for (int i=0;i<jointNames.size();i++)
-      std::cout << jointNames[i] << "(" << PQc[i] << ") ";
-    std::cout << std::endl;
+//    std::cout << "new_pos: ";
+//    for (int i=0;i<jointNames.size();i++)
+//      std::cout << jointNames[i] << "(" << PQc[i] << ") ";
+//    std::cout << std::endl;
 
     // Apply new position
     m_motion.async<void>("setAngles", jointNames, PQc, 1.0);
@@ -380,8 +380,8 @@ void Control::applyJointVelocity()
     for (unsigned int i=0 ; i<m_jointNames.size(); i++)
       new_pos[i] = m_pos[i] + m_vel[i]*delta_t;
 
-    std::cout << "new_pos " << new_pos[0] << " " << std::endl;
-    std::cout << "m_jointNames " << m_jointNames[0] << " " << std::endl;
+//    std::cout << "new_pos " << new_pos[0] << " " << std::endl;
+//    std::cout << "m_jointNames " << m_jointNames[0] << " " << std::endl;
 
     m_motion.async<void>("setAngles", m_jointNames, new_pos, 1.0);
     m_pos = new_pos;
@@ -397,14 +397,14 @@ void Control::setTask()
 {
   if (!m_taskStarted)
   {
-    m_vel.clear();
-    m_jointNames.clear();
-    m_pos.clear();
     m_task.setName("Setvelocity");
     m_task.setUsPeriod(period_ms * 1000);
     m_task.setCallback(&Control::applyJointVelocity, this);
     m_taskStarted = true;
   }
+  m_vel.clear();
+  m_jointNames.clear();
+  m_pos.clear();
   m_prev = qi::SteadyClock::now();
   m_firstTimeTask = true;
   m_task.start();

@@ -18,8 +18,6 @@ while (1)
   // Update velocities
  
   proxy.async<void >("setDesJointVelocity", jointNames_head, vel );
-
-
 }
 
 // Stop the joint motion

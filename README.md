@@ -30,6 +30,5 @@ proxy.call<void >("stop");
 
 
 TODO:
-* Add possibility to control only one joint
 * Add velocity control for the base (vx, vy, wz)
 * Use DCM to set joint positions.

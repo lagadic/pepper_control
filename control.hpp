@@ -54,12 +54,13 @@ public:
 
   std::vector<float> getJointValues (std::vector<std::string> jointNames) const;
   void setDesJointVelocity (std::vector<std::string> jointNames, std::vector<float> vel);
+  void setOneDesJointVelocity (std::string jointName,float vel);
   void setTask();
-  qi::PeriodicTask::Callback printTime() ;
-  void applyJointVelocity() ;
+  qi::PeriodicTask::Callback printTime();
+  void applyJointVelocity();
   void start();
   void stopJoint();
   void stop();
 
 };
-QI_REGISTER_OBJECT(Control, getJointValues, printTime, setDesJointVelocity, start, stop, stopJoint);
+QI_REGISTER_OBJECT(Control, getJointValues, printTime, setDesJointVelocity, setOneDesJointVelocity, start, stop, stopJoint);

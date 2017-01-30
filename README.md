@@ -1,5 +1,19 @@
 # pepper_control
-This module allows controlling the joints of Pepper in velocity.   
+This module allows controlling the joints of Pepper in velocity. 
+
+## Installation
+* Go via terminal to your qibuild workspace:
+* Clone pepper_control:s
+`$ git clone https://github.com/lagadic/pepper_control.git`   
+`$ cd pepper_control`   
+`$ qibuild configure -c toolchain_atom_2.4 --release`  
+`$ cd build-toolchain_atom_2.4-release`   
+`$ qipkg make-package --release pepper_control.pml -c toolchain_atom_2.4`   
+
+
+
+### Example:
+You can use visp_naoqi to control in velocity Romeo or Pepper, otherwise you can directly create a proxy to the module pepper_control running in the robot:
 
 ```
   // Connect to module

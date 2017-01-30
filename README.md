@@ -37,7 +37,7 @@ This module allows controlling the joints of Pepper in velocity.
 
 
 ### Example:
-You can use visp_naoqi to control in velocity Romeo or Pepper, otherwise you can directly create a proxy to the module pepper_control running in the robot:
+You can use visp_naoqi to control the joints of Pepper in velocity, otherwise you can directly create a proxy to the module pepper_control running in the robot:
 
 ```
   // Connect to module

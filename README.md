@@ -35,6 +35,11 @@ This module allows controlling the joints of Pepper in velocity.
 * Click on Robot Applications (right corner)
 * Find pepper_control and click on the green start buttons
 
+### Call function with qicli
+* Connect via terminal to Pepper   
+`$ ssh nao@127.0.0.1` change 127.0.0.1 with the right IP
+* Check if `pepper_control is running` with 
+`$ qicli info`
 
 ### Example:
 You can use visp_naoqi to control the joints of Pepper in velocity, otherwise you can directly create a proxy to the module pepper_control running in the robot:
@@ -68,5 +73,5 @@ proxy.call<void >("stop");
 
 
 TODO:
-* Add velocity control for the base (vx, vy, wz)
+* Launch automatic the module at startup of the robot
 * Use DCM to set joint positions.

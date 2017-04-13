@@ -27,6 +27,7 @@ Control::Control(qi::SessionPtr session)
 
 Control::~Control()
 {
+ m_session->close();
 
 }
 
@@ -413,7 +414,9 @@ void Control::setTask()
   if (!m_taskStarted)
   {
     m_task.setName("Setvelocity");
-    m_task.setUsPeriod(period_ms * 1000);
+   // m_task.setUsPeriod(period_ms * 1000);
+    m_task.setPeriod(qi::MilliSeconds(period_ms));
+
     m_task.setCallback(&Control::applyJointVelocity, this);
     m_taskStarted = true;
   }

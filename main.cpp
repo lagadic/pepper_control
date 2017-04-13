@@ -10,7 +10,7 @@ int main(int argc, char** argv)
   boost::shared_ptr<Control> ctr = boost::make_shared<Control>(session);
   session->registerService("pepper_control", ctr);
 
-   app.run();
+  app.run();
 
   //ctr->stopTask();
 

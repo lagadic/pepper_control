@@ -72,6 +72,17 @@ proxy.call<void >("stop");
 
 
 
+# ERRORS
+```
+[ERROR]: Unable to install package on target
+[ERROR]: Error was:  No module named qi
+```
+Remember to add the python sdk to the path:   
+```
+gclaudio@humanoid:~/romeo/cpp/workspace/control_pepper$ export PYTHONPATH=/home/common/naoqi-sdk/pynaoqi-python2.7-2.4.3.28-linux64:$PYTHONPATH 
+```
+
+
 TODO:
 * Launch automatic the module at startup of the robot
 * Use DCM to set joint positions.

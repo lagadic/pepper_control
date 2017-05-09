@@ -72,7 +72,7 @@ proxy.call<void >("stop");
 
 
 
-# ERRORS
+### Possible problems
 ```
 [ERROR]: Unable to install package on target
 [ERROR]: Error was:  No module named qi

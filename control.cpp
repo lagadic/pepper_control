@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream> 
 #include <qi/clock.hpp>
-#include <alcommon/alproxy.h>
 #include <boost/chrono/chrono_io.hpp>
 #include <control.hpp>
 
@@ -111,7 +110,7 @@ void Control::setDesJointVelocity (std::vector<std::string> jointNames, std::vec
 
     for (unsigned int i=0; i<jointNames.size(); i++)
     {
-      AL::ALValue limits = m_motion.call< AL::ALValue >("getLimits", jointNames[i]);
+      std::vector<std::vector<float>> limits = m_motion.call< std::vector<std::vector<float>> >("getLimits", jointNames[i]);
       //std::cout << limits << std::endl;
       QMin[i] = limits[0][0];
       QMax[i] = limits[0][1];

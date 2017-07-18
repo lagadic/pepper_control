@@ -49,10 +49,10 @@
 
 Control::Control(qi::SessionPtr session)
   : m_session(session), m_prev(), m_task(), m_vel(), m_pos(),
-    m_jointNames(),lock_(), m_taskStarted(false), m_firstTimeTask(true),
-    Status(), deltaQmax(), deltaQ(), Qacc(), Qacc_sav(), ConsFin(), SigneDep(),
-    PQc(), dist_AD(), pcspeed(), pcspeed_old(), ecart(), FlagSpeed(), vmax(false), flagbutee(false),
-    AccMax(), VitMax(), QMin(), QMax(), period_ms(2)
+    m_jointNames(),m_lock(), m_taskStarted(false), m_firstTimeTask(true),
+    m_status(), m_deltaQmax(), m_deltaQ(), m_Qacc(), m_Qacc_sav(), m_consFin(), m_signeDep(),
+    m_PQc(), m_dist_AD(), m_pcspeed(), m_pcspeed_old(), m_ecart(), m_flagSpeed(), vmax(false), flagbutee(false),
+    m_accMax(), m_vitMax(), QMin(), QMax(), m_period_ms(2)
 {
   m_prev = qi::SteadyClock::now();
   m_motion = m_session->service("ALMotion");
@@ -72,10 +72,10 @@ void Control::start()
 
 void Control::stopJoint()
 {
-  lock_.lock();
+  m_lock.lock();
   std::vector<float> zero (m_vel.size(), 0.0);
   m_vel = zero;
-  lock_.unlock();
+  m_lock.unlock();
   std::cout << "Stop joints" << std::endl;
 }
 
@@ -95,38 +95,34 @@ void Control::setOneDesJointVelocity (std::string jointName, float vel)
   std::vector<float> vel_v;
   vel_v.push_back(vel);
   setDesJointVelocity(jointName_v, vel_v);
-//  std::cout << "Calling setOneDesJointVelocity" << std::endl;
 }
-
-
 
 void Control::setDesJointVelocity (std::vector<std::string> jointNames, std::vector<float> vel)
 {
-  lock_.lock();
+  m_lock.lock();
   std::vector<std::string> jointNames_prev = m_jointNames;
-  lock_.unlock();
+  m_lock.unlock();
 
 //  std::cout << "jointNames.size()" << jointNames.size() << std::endl;
-
 
   if (jointNames != jointNames_prev) {
     // TODO: Call next only if joint names modified
     size_t njoint = jointNames.size();
-    Status.resize(njoint);
-    deltaQmax.resize(njoint);
-    deltaQ.resize(njoint);
-    Qacc.resize(njoint);
-    Qacc_sav.resize(njoint);
-    ConsFin.resize(njoint);
-    SigneDep.resize(njoint);
-    PQc.resize(njoint);
-    dist_AD.resize(njoint);
-    pcspeed.resize(njoint);
-    pcspeed_old.resize(njoint);
-    ecart.resize(njoint);
-    FlagSpeed.resize(njoint);
-    AccMax.resize(njoint);
-    VitMax.resize(njoint);
+    m_status.resize(njoint);
+    m_deltaQmax.resize(njoint);
+    m_deltaQ.resize(njoint);
+    m_Qacc.resize(njoint);
+    m_Qacc_sav.resize(njoint);
+    m_consFin.resize(njoint);
+    m_signeDep.resize(njoint);
+    m_PQc.resize(njoint);
+    m_dist_AD.resize(njoint);
+    m_pcspeed.resize(njoint);
+    m_pcspeed_old.resize(njoint);
+    m_ecart.resize(njoint);
+    m_flagSpeed.resize(njoint);
+    m_accMax.resize(njoint);
+    m_vitMax.resize(njoint);
     QMin.resize(njoint);
     QMax.resize(njoint);
 
@@ -137,9 +133,9 @@ void Control::setDesJointVelocity (std::vector<std::string> jointNames, std::vec
     //    //std::cout << limits << std::endl;
     //    QMin[i] = limits[0].asFloat();
     //    QMax[i] = limits[1].asFloat();
-    //    VitMax[i] = limits[2].asFloat();
-    //    AccMax[i] = 0.1; // To improve (~10deg in 2 sec)
-    //    std::cout << " jointNames " << jointNames[i] << " " << QMin[i] << " " << QMax[i] << " " << VitMax[i] << std::endl;
+    //    m_vitMax[i] = limits[2].asFloat();
+    //    m_accMax[i] = 0.1; // To improve (~10deg in 2 sec)
+    //    std::cout << " jointNames " << jointNames[i] << " " << QMin[i] << " " << QMax[i] << " " << m_vitMax[i] << std::endl;
     //  }
 
     for (unsigned int i=0; i<jointNames.size(); i++)
@@ -148,26 +144,26 @@ void Control::setDesJointVelocity (std::vector<std::string> jointNames, std::vec
       //std::cout << limits << std::endl;
       QMin[i] = limits[0][0];
       QMax[i] = limits[0][1];
-      VitMax[i] = limits[0][2];
-      AccMax[i] = 5.; // To improve (~10deg in 2 sec)
-      std::cout << " jointNames " << jointNames[i] << " " << QMin[i] << " " << QMax[i] << " " << VitMax[i] << std::endl;
+      m_vitMax[i] = limits[0][2];
+      m_accMax[i] = 5.; // To improve (~10deg in 2 sec)
+      std::cout << " jointNames " << jointNames[i] << " " << QMin[i] << " " << QMax[i] << " " << m_vitMax[i] << std::endl;
 
-      FlagSpeed[i] = false;
-      Status[i] 	= FLAGSTO;
-      deltaQ[i] 	= deltaQmax[i] 	= 0.0;
-      Qacc_sav[i] = Qacc[i] = AccMax[i] * period_ms * period_ms / 1000000.;
-      ConsFin[i] 	= PQc[i] = 0.0; //get_q(i);
-      dist_AD[i] 	= 0.0;
-      pcspeed[i]	= pcspeed_old[i] = 0.0;
-      Status[i]   = FLAGSTO;
-      SigneDep[i]	= 0;
-      ConsFin[i] = 0;
+      m_flagSpeed[i] = false;
+      m_status[i] 	= FLAGSTO;
+      m_deltaQ[i] 	= m_deltaQmax[i] 	= 0.0;
+      m_Qacc_sav[i] = m_Qacc[i] = m_accMax[i] * m_period_ms * m_period_ms / 1000000.;
+      m_consFin[i] 	= m_PQc[i] = 0.0; //get_q(i);
+      m_dist_AD[i] 	= 0.0;
+      m_pcspeed[i]	= m_pcspeed_old[i] = 0.0;
+      m_status[i]   = FLAGSTO;
+      m_signeDep[i]	= 0;
+      m_consFin[i] = 0;
     }
 
     m_pos = m_motion.call<std::vector<float> >("getAngles", jointNames, 1);
 
     for (unsigned int i=0; i<jointNames.size(); i++)
-      PQc[i] = m_pos[i];
+      m_PQc[i] = m_pos[i];
 
   }
 
@@ -175,12 +171,12 @@ void Control::setDesJointVelocity (std::vector<std::string> jointNames, std::vec
   //  m_pos = m_motion.call<std::vector<float> >("getAngles", jointNames, 1);
 
   //  for (unsigned int i=0; i<jointNames.size(); i++)
-  //    PQc[i] = m_pos[i];
+  //    m_PQc[i] = m_pos[i];
 
-  lock_.lock();
+  m_lock.lock();
   m_vel = vel;
   m_jointNames = jointNames;
-  lock_.unlock();
+  m_lock.unlock();
 }
 
 std::vector<float> Control::getJointValues (std::vector<std::string> jointNames) const
@@ -204,15 +200,13 @@ void Control::applyJointVelocity()
 {
   qi::SteadyClock::time_point now = qi::SteadyClock::now();
 
-  lock_.lock();
+  m_lock.lock();
   std::vector<std::string> jointNames = m_jointNames;
   std::vector<float> vel = m_vel;
-  lock_.unlock();
+  m_lock.unlock();
 
   if (vel.size()>0 && jointNames.size()>0)
   {
-
-#if 1
     qi::MicroSeconds us = boost::chrono::duration_cast<qi::MicroSeconds>(now - m_prev);
     double delta_t =  us.count()/1000000.;
 
@@ -222,22 +216,22 @@ void Control::applyJointVelocity()
      * Test si changement de consigne.
      */
     for (int i=0;i<jointNames.size();i++) {
-      pcspeed[i] = vel[i]; // TODO fuse in same var
+      m_pcspeed[i] = vel[i]; // TODO fuse in same var
 
-      if (pcspeed[i] != pcspeed_old[i]) flagbutee = false;
+      if (m_pcspeed[i] != m_pcspeed_old[i]) flagbutee = false;
 
-      if (pcspeed[i] != pcspeed_old[i]) {
-        Qacc[i] = Qacc_sav[i];
+      if (m_pcspeed[i] != m_pcspeed_old[i]) {
+        m_Qacc[i] = m_Qacc_sav[i];
 
-        if (pcspeed[i] > VitMax[i]) {
-          pcspeed[i] = VitMax[i];
+        if (m_pcspeed[i] > m_vitMax[i]) {
+          m_pcspeed[i] = m_vitMax[i];
           if (vmax == false)
           {
             vmax = true;
           }
         }
-        else if (pcspeed[i] < (-VitMax[i])) {
-          pcspeed[i] = -VitMax[i];
+        else if (m_pcspeed[i] < (-m_vitMax[i])) {
+          m_pcspeed[i] = -m_vitMax[i];
           if (vmax == false)
           {
             vmax = true;
@@ -245,63 +239,63 @@ void Control::applyJointVelocity()
         }
         else vmax = false;
 
-        if (FlagSpeed[i] == false) {
-          //if (pt_movespeed.FlagSpeed[i] == false) {
+        if (m_flagSpeed[i] == false) {
+          //if (pt_movespeed.m_flagSpeed[i] == false) {
           /* Changement de consigne et non en phase de chang sens */
 
-          if ( Status[i] == FLAGSTO) /* Si arret */
+          if ( m_status[i] == FLAGSTO) /* Si arret */
           {
-            if (pcspeed[i] > 0)
+            if (m_pcspeed[i] > 0)
             {
-              deltaQmax[i] = pcspeed[i]*delta_t;
-              SigneDep[i] = 1;
-              ConsFin[i] = QMax[i] - OFFSET_BUTEE;
-              deltaQ[i] = 0;
-              Status[i] = FLAGACC;
+              m_deltaQmax[i] = m_pcspeed[i]*delta_t;
+              m_signeDep[i] = 1;
+              m_consFin[i] = QMax[i] - OFFSET_BUTEE;
+              m_deltaQ[i] = 0;
+              m_status[i] = FLAGACC;
             }
-            else if (pcspeed[i] < 0)
+            else if (m_pcspeed[i] < 0)
             {
-              deltaQmax[i] = - pcspeed[i]*delta_t;
-              SigneDep[i] = -1;
-              ConsFin[i] = QMin[i] + OFFSET_BUTEE;
-              deltaQ[i] = 0;
-              Status[i] = FLAGACC;
+              m_deltaQmax[i] = - m_pcspeed[i]*delta_t;
+              m_signeDep[i] = -1;
+              m_consFin[i] = QMin[i] + OFFSET_BUTEE;
+              m_deltaQ[i] = 0;
+              m_status[i] = FLAGACC;
             }
           }
           // Si non en arret et changement de sens
 
-          else if ( (pcspeed[i] * SigneDep[i]) < 0) {
-            FlagSpeed[i] = true;
-            Status[i] = FLAGDEC;
-            deltaQmax[i] = 0;
+          else if ( (m_pcspeed[i] * m_signeDep[i]) < 0) {
+            m_flagSpeed[i] = true;
+            m_status[i] = FLAGDEC;
+            m_deltaQmax[i] = 0;
           }
           // Pas de changement de sens
 
           else {	/* Non arret et pas de changement de sens */
-            if ( SigneDep[i] == 1) {
-              if ( pcspeed[i] > pcspeed_old[i])
-                Status[i] = FLAGACC;
-              else  Status[i] = FLAGDEC;
-              deltaQmax[i] = pcspeed[i]*delta_t;
+            if ( m_signeDep[i] == 1) {
+              if ( m_pcspeed[i] > m_pcspeed_old[i])
+                m_status[i] = FLAGACC;
+              else  m_status[i] = FLAGDEC;
+              m_deltaQmax[i] = m_pcspeed[i]*delta_t;
             }
             else {
-              if ( pcspeed[i] > pcspeed_old[i])
-                Status[i] = FLAGDEC;
-              else  Status[i] = FLAGACC;
-              deltaQmax[i] = - pcspeed[i]*delta_t;
+              if ( m_pcspeed[i] > m_pcspeed_old[i])
+                m_status[i] = FLAGDEC;
+              else  m_status[i] = FLAGACC;
+              m_deltaQmax[i] = - m_pcspeed[i]*delta_t;
             }
           }
 
-          int n = (int) (deltaQmax[i] / Qacc[i]);
-          dist_AD[i]=n*(deltaQmax[i]-(n+1)*Qacc[i]/2);
+          int n = (int) (m_deltaQmax[i] / m_Qacc[i]);
+          m_dist_AD[i]=n*(m_deltaQmax[i]-(n+1)*m_Qacc[i]/2);
         }
-        pcspeed_old[i] = pcspeed[i];
+        m_pcspeed_old[i] = m_pcspeed[i];
       }
     }
 
-    //    std::cout << "ConsFin: ";
+    //    std::cout << "m_consFin: ";
     //    for (int i=0;i<jointNames.size();i++)
-    //      std::cout << jointNames[i] << "(" << ConsFin[i] << ") ";
+    //      std::cout << jointNames[i] << "(" << m_consFin[i] << ") ";
 
     /*
      * calcul des consignes selon les cas:
@@ -314,56 +308,56 @@ void Control::applyJointVelocity()
       /*
        * Securite butee en vitesse constante
        */
-      ecart[i] = ( ConsFin[i] - PQc[i]) * SigneDep[i];
-      if ((ecart[i] - deltaQmax[i]) <=  dist_AD[i]) {
-        if (dist_AD[i] > 0) {
+      m_ecart[i] = ( m_consFin[i] - m_PQc[i]) * m_signeDep[i];
+      if ((m_ecart[i] - m_deltaQmax[i]) <=  m_dist_AD[i]) {
+        if (m_dist_AD[i] > 0) {
           if (!flagbutee) printf("Flagbutee axe %d\n",i);
           flagbutee = true;
           for(int k=0;k<jointNames.size();k++)
           {
-            if (Status[k] != FLAGSTO) Status[k] = FLAGDEC;
-            deltaQmax[k] = 0;
+            if (m_status[k] != FLAGSTO) m_status[k] = FLAGDEC;
+            m_deltaQmax[k] = 0;
           }
         }
       }
       /*
        * Deceleration.
        */
-      if ( Status[i] == FLAGDEC) {
-        deltaQ[i] -=  Qacc[i];
-        if (deltaQ[i] <=  deltaQmax[i]) {
-          if (deltaQmax[i] < DELTAQMIN)  {
-            Status[i] = FLAGSTO;
-            deltaQ[i] = 0.0;
+      if ( m_status[i] == FLAGDEC) {
+        m_deltaQ[i] -=  m_Qacc[i];
+        if (m_deltaQ[i] <=  m_deltaQmax[i]) {
+          if (m_deltaQmax[i] < DELTAQMIN)  {
+            m_status[i] = FLAGSTO;
+            m_deltaQ[i] = 0.0;
             // Test si on etait en phase de changement de sens.
-            if (FlagSpeed[i] == true) {
-              //if (pt_movespeed.FlagSpeed[i] == true) {
-              if (pcspeed[i] > 0) {
-                deltaQmax[i] = pcspeed[i]*delta_t;
-                SigneDep[i] = 1;
-                ConsFin[i] = QMax[i] - OFFSET_BUTEE;
+            if (m_flagSpeed[i] == true) {
+              //if (pt_movespeed.m_flagSpeed[i] == true) {
+              if (m_pcspeed[i] > 0) {
+                m_deltaQmax[i] = m_pcspeed[i]*delta_t;
+                m_signeDep[i] = 1;
+                m_consFin[i] = QMax[i] - OFFSET_BUTEE;
               }
-              else if (pcspeed[i] < 0) {
-                deltaQmax[i] = -pcspeed[i]*delta_t;
-                SigneDep[i] = -1;
-                ConsFin[i] = QMin[i] + OFFSET_BUTEE;
+              else if (m_pcspeed[i] < 0) {
+                m_deltaQmax[i] = -m_pcspeed[i]*delta_t;
+                m_signeDep[i] = -1;
+                m_consFin[i] = QMin[i] + OFFSET_BUTEE;
               }
-              Status[i] = FLAGACC;
-              FlagSpeed[i] = false;
+              m_status[i] = FLAGACC;
+              m_flagSpeed[i] = false;
 
-              int n = (int) (deltaQmax[i] / Qacc[i]);
-              dist_AD[i]=n*(deltaQmax[i]-(n+1)*Qacc[i]/2);
+              int n = (int) (m_deltaQmax[i] / m_Qacc[i]);
+              m_dist_AD[i]=n*(m_deltaQmax[i]-(n+1)*m_Qacc[i]/2);
             }
           }
-          else if ((deltaQmax[i] > 0) && !flagbutee)  {
-            if (deltaQmax[i] < (deltaQ[i] + 2*Qacc[i])) {
-              deltaQ[i] = deltaQmax[i];
-              Status[i] = FLAGCTE;
+          else if ((m_deltaQmax[i] > 0) && !flagbutee)  {
+            if (m_deltaQmax[i] < (m_deltaQ[i] + 2*m_Qacc[i])) {
+              m_deltaQ[i] = m_deltaQmax[i];
+              m_status[i] = FLAGCTE;
             }
             else if (!flagbutee) {
               /* acceleration moins rapide*/
-              deltaQ[i] += (2*Qacc[i]);
-              Status[i] = FLAGACC;
+              m_deltaQ[i] += (2*m_Qacc[i]);
+              m_status[i] = FLAGACC;
             }
           }
         }
@@ -371,70 +365,45 @@ void Control::applyJointVelocity()
       /*
        * Acceleration.
        */
-      else if (Status[i] == FLAGACC) {
-        deltaQ[i] += Qacc[i];
+      else if (m_status[i] == FLAGACC) {
+        m_deltaQ[i] += m_Qacc[i];
 
-        if (deltaQ[i] >= deltaQmax[i]) {
-          deltaQ[i] = deltaQmax[i];
-          Status[i] = FLAGCTE;
+        if (m_deltaQ[i] >= m_deltaQmax[i]) {
+          m_deltaQ[i] = m_deltaQmax[i];
+          m_status[i] = FLAGCTE;
         }
       }
       /*
        * Sinon a vitesse constante increment non change.
        */
-      PQc[i] += SigneDep[i] * deltaQ[i];
+      m_PQc[i] += m_signeDep[i] * m_deltaQ[i];
 
     } /* endfor */
 
     // Test si un axe arrive pres des butees. Si oui, arret de tous les axes
     for (int i=0;i<jointNames.size();i++) {
       float butee = QMin[i] + OFFSET_BUTEE;
-      if (PQc[i] < butee) {
-        for (int j=0;j<jointNames.size();j++) PQc[j] -= SigneDep[j]*deltaQ[j];
-        PQc[i] = butee;
+      if (m_PQc[i] < butee) {
+        for (int j=0;j<jointNames.size();j++) m_PQc[j] -= m_signeDep[j]*m_deltaQ[j];
+        m_PQc[i] = butee;
         printf("Butee axe %d\n",i);
         break;
       }
       butee = (float) (QMax[i] - OFFSET_BUTEE);
-      if (PQc[i] > butee) {
-        for (int j=0;j<jointNames.size();j++) PQc[j] -= SigneDep[j]*deltaQ[j];
-        PQc[i] = butee;
+      if (m_PQc[i] > butee) {
+        for (int j=0;j<jointNames.size();j++) m_PQc[j] -= m_signeDep[j]*m_deltaQ[j];
+        m_PQc[i] = butee;
         printf("Butee axe %d\n",i);
         break;
       }
     }
     //    std::cout << "new_pos: ";
     //    for (int i=0;i<jointNames.size();i++)
-    //      std::cout << jointNames[i] << "(" << PQc[i] << ") ";
+    //      std::cout << jointNames[i] << "(" << m_PQc[i] << ") ";
     //    std::cout << std::endl;
 
     // Apply new position
-    m_motion.async<void>("setAngles", jointNames, PQc, 1.0);
-#else
-    //std::cout << "m_vel: " << m_vel[0] << std::endl << m_vel[1] << std::endl  << "m_jointNames" <<   m_jointNames[0] << std::endl<<   m_jointNames[1] << std::endl;
-    if (m_firstTimeTask)
-    {
-      m_pos = m_motion.call<std::vector<float> >("getAngles", m_jointNames, 1);
-      m_firstTimeTask = false;
-      std::cout << "Reset pos to" << m_pos[0] <<" "<<m_pos[1] << std::endl;
-    }
-
-    qi::MicroSeconds us = boost::chrono::duration_cast<qi::MicroSeconds>(now - m_prev);
-    double delta_t =  us.count()/1000000.;
-
-    //std::cout << "delta_t " << delta_t << " sec" << std::endl;
-
-    std::vector<float> new_pos(m_jointNames.size());
-
-    for (unsigned int i=0 ; i<m_jointNames.size(); i++)
-      new_pos[i] = m_pos[i] + m_vel[i]*delta_t;
-
-    //    std::cout << "new_pos " << new_pos[0] << " " << std::endl;
-    //    std::cout << "m_jointNames " << m_jointNames[0] << " " << std::endl;
-
-    m_motion.async<void>("setAngles", m_jointNames, new_pos, 1.0);
-    m_pos = new_pos;
-#endif
+    m_motion.async<void>("setAngles", jointNames, m_PQc, 1.0);
   }
 
   m_prev = now;
@@ -446,8 +415,7 @@ void Control::setTask()
   if (!m_taskStarted)
   {
     m_task.setName("Setvelocity");
-   // m_task.setUsPeriod(period_ms * 1000);
-    m_task.setPeriod(qi::MilliSeconds(period_ms));
+    m_task.setPeriod(qi::MilliSeconds(m_period_ms));
 
     m_task.setCallback(&Control::applyJointVelocity, this);
     m_taskStarted = true;

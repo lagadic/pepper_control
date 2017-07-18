@@ -50,36 +50,34 @@ private:
   std::vector<float> m_pos;
   std::vector<std::string> m_jointNames; // protected by mutex
   qi::AnyObject m_motion;
-  boost::mutex lock_;
+  boost::mutex m_lock;
 
-  int period_ms;
+  int m_period_ms;
 
   bool m_taskStarted;
   bool m_firstTimeTask;
 
-  std::vector<int>	 Status;	        // Flag d'etat des axes
-  std::vector<float> deltaQmax;        // Increment de consigne maximum
-  std::vector<float> deltaQ;		// Increment de consigne en cours
-  std::vector<float> Qacc;		// Increment d'increment de consigne
-  std::vector<float> Qacc_sav;         // Sauvegarde
-  std::vector<float> ConsFin;    	// Consigne finale (butee)
-  std::vector<int>   SigneDep;	        // Signe du deplacement: +1 = incrementer consigne
-  std::vector<float> PQc;              // Position mesuree et position calculee en rad
-  std::vector<float> dist_AD;		// Distance requise pour acce et decel
-  std::vector<float> pcspeed;		// Recopie des consigne de vitesse
-  std::vector<float> pcspeed_old;
-  std::vector<float> ecart;		// Difference entre consigne et consigne finale
-  std::vector<float> FlagSpeed;
+  std::vector<int>	 m_status;	    // Flag d'etat des axes
+  std::vector<float> m_deltaQmax;   // Increment de consigne maximum
+  std::vector<float> m_deltaQ;		    // Increment de consigne en cours
+  std::vector<float> m_Qacc;		    // Increment d'increment de consigne
+  std::vector<float> m_Qacc_sav;    // Sauvegarde
+  std::vector<float> m_consFin;    	// Consigne finale (butee)
+  std::vector<int>   m_signeDep;	  // Signe du deplacement: +1 = incrementer consigne
+  std::vector<float> m_PQc;         // Position mesuree et position calculee en rad
+  std::vector<float> m_dist_AD;		  // Distance requise pour acce et decel
+  std::vector<float> m_pcspeed;		  // Recopie des consigne de vitesse
+  std::vector<float> m_pcspeed_old;
+  std::vector<float> m_ecart;		    // Difference entre consigne et consigne finale
+  std::vector<float> m_flagSpeed;
   bool vmax;
   bool flagbutee;
 
   // Constant
-  std::vector<float> AccMax;    // Acceleration maximale
-  std::vector<float> VitMax;    // Vitesses maximales
-  std::vector<float> QMax;	// Butee softs maximale
-  std::vector<float> QMin;	// Butee softs minimale
-
-
+  std::vector<float> m_accMax;    // Acceleration maximale
+  std::vector<float> m_vitMax;    // Vitesses maximales
+  std::vector<float> QMax;	      // Butee softs maximale
+  std::vector<float> QMin;	      // Butee softs minimale
 
 public:
   Control(qi::SessionPtr session);
@@ -87,7 +85,7 @@ public:
 
   std::vector<float> getJointValues (std::vector<std::string> jointNames) const;
   void setDesJointVelocity (std::vector<std::string> jointNames, std::vector<float> vel);
-  void setOneDesJointVelocity (std::string jointName,float vel);
+  void setOneDesJointVelocity (std::string jointName, float vel);
   void setTask();
   qi::PeriodicTask::Callback printTime();
   void applyJointVelocity();

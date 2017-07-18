@@ -12,13 +12,15 @@ This module allows controlling the joints of Pepper in velocity.
 
 ### Run the module in remote (just for testing)
 
-* Configure remote module:  
+Following instructions are valid with Ubuntu 14.04. If you are using Ubuntu 16.04 you should use 2.5 toolchain. But in that case Pepper should also use naoqi 2.5.
+
+* Configure remote module:
 
         $ qibuild configure -c toolchain_2_4 --release
-        
+
 * Build:
 
-        $ qibuild build -c toolchain_2_4 --release
+        $ qibuild make -c toolchain_2_4
 
 * Run the module in remote (change the argument `--qi-url`  with your robot ip and port):
 

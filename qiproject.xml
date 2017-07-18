@@ -1,6 +1,0 @@
-<!-- in qiproject.xml -->
-<project version="3">
-  <qibuild name="pepper_control">
-    <depends runtime="true" buildtime="true" names="libnaoqi" />
-  </qibuild>
-</project>

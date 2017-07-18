@@ -31,9 +31,9 @@ Following instructions are valid with Ubuntu 14.04. If you are using Ubuntu 16.0
 ### Run the module locally 
 
 * Download the Cross Toolchain 2.4.3 Linux 64
-* Create a toolchain for the cross compilation (I have called it `atom_2_4`) ([Instructions](http://doc.aldebaran.com/2-4/dev/cpp/install_guide.html#e-compile-and-run-an-example))   
+* Create a toolchain for the cross compilation (I have called it `atom_2_4`) ([Instructions](http://doc.aldebaran.com/2-4/dev/cpp/install_guide.html#e-compile-and-run-an-example))
 
-* Configure local module:  
+* Configure local module:
 
         $ qibuild configure -c atom_2_4 --release
 
@@ -51,14 +51,14 @@ Following instructions are valid with Ubuntu 14.04. If you are using Ubuntu 16.0
 
 ### Launch module
  
-* Open Choregraphe  
-* Connect to Pepper  
+* Open Choregraphe
+* Connect to Pepper
 * Click on Robot Applications (right corner)
 * Find pepper_control and click on the green start buttons
 
 ### Call function with qicli
 
-* Connect via terminal to Pepper   
+* Connect via terminal to Pepper
 
         $ ssh nao@127.0.0.1  # change 127.0.0.1 with the right IP
         
@@ -104,12 +104,12 @@ proxy.call<void >("stop");
 [ERROR]: Unable to install package on target
 [ERROR]: Error was:  No module named qi
 ```
-Remember to add the python sdk to the path:   
+Remember to add the python sdk to the path:
 ```
 $ export PYTHONPATH=/home/common/naoqi-sdk/pynaoqi-python2.7-2.4.3.28-linux64:$PYTHONPATH 
 ```
 
 
-TODO:
+## TODO:
 * Launch automatic the module at startup of the robot
 * Use DCM to set joint positions.
